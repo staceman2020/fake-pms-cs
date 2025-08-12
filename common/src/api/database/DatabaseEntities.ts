@@ -16,3 +16,16 @@ export interface IFormInstanceEntity extends IRepoBaseEntity {
   data: any; // The data in the form
   userId: string; // The user who filled out the form
 }
+
+export interface IPatientEntity extends IRepoBaseEntity {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  gender: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  medicalRecordNumber: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+}

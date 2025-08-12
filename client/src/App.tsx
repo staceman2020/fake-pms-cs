@@ -11,6 +11,7 @@ import {
 } from "./forms/ui";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
+import "./sketchy-bs.css";
 
 function App() {
   return (

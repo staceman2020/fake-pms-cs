@@ -32,7 +32,7 @@ export function AppNavigationBar() {
     <>
       <Navbar bg="light" expand="lg">
         <Container fluid>
-          <Navbar.Brand href="/">Form Server</Navbar.Brand>
+          <Navbar.Brand href="/">PMS 2030</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
