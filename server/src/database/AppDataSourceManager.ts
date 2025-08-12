@@ -5,6 +5,7 @@ import { EntityApiManager } from "./EntityApiManager";
 import { RepoApiEndpointRegistry } from "../../../common/src/api/database/DatabaseApiEndpointRegistry";
 import { FormEntity } from "./entities/FormEntity";
 import { FormInstanceEntity } from "./entities/FormInstanceEntity";
+import { PatientEntity } from "./entities/PatientEntity";
 
 export class AppDataSourceManager {
   private static instance: AppDataSourceManager;
@@ -13,6 +14,7 @@ export class AppDataSourceManager {
 
   private formInstanceEM: EntityApiManager;
   private formEM: EntityApiManager;
+  private patientEM: EntityApiManager;
 
   private constructor(private directory: string) {
     const database = this.directory + "/model_repo.sqlite";
@@ -22,16 +24,14 @@ export class AppDataSourceManager {
       database: database,
       synchronize: true,
       logging: true,
-      entities: [FormInstanceEntity, FormEntity],
+  entities: [FormInstanceEntity, FormEntity, PatientEntity],
       migrations: [],
       subscribers: [],
     });
 
     this.formEM = new EntityApiManager(this.dataSource, "FormEntity");
-    this.formInstanceEM = new EntityApiManager(
-      this.dataSource,
-      "FormInstanceEntity"
-    );
+  this.formInstanceEM = new EntityApiManager(this.dataSource, "FormInstanceEntity");
+  this.patientEM = new EntityApiManager(this.dataSource, "PatientEntity");
   }
 
   public static async getInstance(): Promise<AppDataSourceManager> {
@@ -70,7 +70,8 @@ export class AppDataSourceManager {
         app,
         RepoApiEndpointRegistry.FORM_INSTANCE
       );
-      this.formEM.registerRoutes(app, RepoApiEndpointRegistry.FORM);
+  this.formEM.registerRoutes(app, RepoApiEndpointRegistry.FORM);
+  this.patientEM.registerRoutes(app, RepoApiEndpointRegistry.PATIENT);
     }
   }
 }

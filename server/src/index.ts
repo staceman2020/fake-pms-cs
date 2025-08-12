@@ -15,12 +15,12 @@ function ensureDirectoryExists(directory: string): void {
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Configure CORS globally
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"], // Allow your client origins
+    origin: ["http://localhost:5173", "http://localhost:3001"], // Allow your client origins
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

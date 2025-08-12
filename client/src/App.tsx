@@ -9,6 +9,7 @@ import {
   MyFormInstances,
   FillForm,
 } from "./forms/ui";
+import { PatientsList, PatientEditor } from "./patients/ui";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "./sketchy-bs.css";
@@ -27,6 +28,9 @@ function App() {
             <Route path="/myforms" element={<MyFormInstances />} />
             <Route path="/forms/fill/:id" element={<FillForm />} />
             <Route path="/forms/view/:id" element={<FillForm />} />
+            <Route path="/patients" element={<PatientsList />} />
+            <Route path="/patients/create" element={<PatientEditor />} />
+            <Route path="/patients/edit/:id" element={<PatientEditor />} />
           </Routes>
         </HashRouter>
       </Container>

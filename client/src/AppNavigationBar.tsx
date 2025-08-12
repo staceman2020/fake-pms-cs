@@ -39,6 +39,9 @@ export function AppNavigationBar() {
               <LinkContainer to="/forms">
                 <Nav.Link href="#forms">Forms</Nav.Link>
               </LinkContainer>
+              <LinkContainer to="/patients">
+                <Nav.Link href="#patients">Patients</Nav.Link>
+              </LinkContainer>
               <LinkContainer to="/fillform">
                 <Nav.Link href="#fillform">Fill Form</Nav.Link>
               </LinkContainer>

@@ -1,6 +1,6 @@
 export class APIBase {
   private baseUrl: string = "/api";
-  private port: number = 3000;
+  private port: number = 3001;
 
   constructor() {
     // The base URL is taken from the root of the window location and then the port is changed to be
