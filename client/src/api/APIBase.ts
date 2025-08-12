@@ -16,7 +16,10 @@ export class APIBase {
     return `${this.baseUrl}${endpoint}`;
   }
 
-  protected async fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
+  protected async fetchJSON<T>(
+    url: string,
+    options?: RequestInit
+  ): Promise<T | undefined> {
     const response = await fetch(this.makeUrl(url), {
       headers: {
         "Content-Type": "application/json",
@@ -24,7 +27,15 @@ export class APIBase {
       ...options,
     });
     if (!response.ok) {
-      throw new Error(`Error fetching API: ${response.statusText}`);
+      if (response.status === 404) {
+        return undefined;
+      }
+      if (response.status === 204) {
+        return undefined;
+      }
+      if (response.status === 500) {
+        throw new Error(`Error fetching API: ${response.statusText}`);
+      }
     }
     return response.json();
   }

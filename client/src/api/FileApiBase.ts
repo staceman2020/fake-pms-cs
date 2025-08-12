@@ -13,11 +13,11 @@ export class FileApiBase extends APIBase {
     this.endpoints = endpoints;
   }
 
-  async listFiles(): Promise<FileMetadata[]> {
+  async listFiles(): Promise<FileMetadata[] | undefined> {
     return this.fetchJSON(this.endpoints.listFiles);
   }
 
-  async readLatest(): Promise<FileContent> {
+  async readLatest(): Promise<FileContent | undefined> {
     return this.fetchJSON(this.endpoints.readLatest);
   }
 
