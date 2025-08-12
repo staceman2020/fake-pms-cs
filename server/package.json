@@ -1,0 +1,50 @@
+{
+  "name": "picture-server",
+  "version": "1.0.0",
+  "description": "Servers pictures",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts",
+    "test": "vitest",
+    "xdev": "npx dotenvx run -f .env.work -- npx tsx  src/index.ts",
+    "ahprod": "npx dotenvx run -f .env.ahprod -- node dist/index.js",
+    "work": "dotenvx run -f .env.work -- node dist/index.js",
+    "pi": "dotenvx run -f .env.linuxprod -- node dist/index.js",
+    "workdev": "dotenvx run -f .env.work -- nodemon src/index.ts",
+    "buildsites": "npx gulp ",
+    "buildpix": "npx gulp buildPix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.26.2",
+    "@types/cors": "^2.8.17",
+    "@xmldom/xmldom": "^0.9.8",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fast-xml-parser": "^5.2.5",
+    "fs": "^0.0.1-security",
+    "lodash": "^4.17.21",
+    "plantuml-encoder": "^1.4.0",
+    "sqlite3": "^5.1.7",
+    "staceman-drawio-core": "file:../drawio-core",
+    "ts-node": "^10.9.2",
+    "typeorm": "^0.3.25"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/lodash": "^4.17.13",
+    "@types/node": "^22.4.0",
+    "@types/sqlite3": "^3.1.11",
+    "gulp": "^5.0.0",
+    "gulp-run": "^1.7.1",
+    "nodemon": "^3.1.4",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.14",
+    "vitest": "^2.1.9"
+  }
+}
