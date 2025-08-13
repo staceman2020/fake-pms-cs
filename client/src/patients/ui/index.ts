@@ -1,2 +1,2 @@
-export * from './PatientsList';
-export * from './PatientEditor';
+export * from "./PatientsList";
+export * from "./PatientEditor";

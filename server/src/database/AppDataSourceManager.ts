@@ -6,6 +6,7 @@ import { RepoApiEndpointRegistry } from "../../../common/src/api/database/Databa
 import { FormEntity } from "./entities/FormEntity";
 import { FormInstanceEntity } from "./entities/FormInstanceEntity";
 import { PatientEntity } from "./entities/PatientEntity";
+import { PatientVisitEntity } from "./entities/PatientVisitEntity";
 
 export class AppDataSourceManager {
   private static instance: AppDataSourceManager;
@@ -15,6 +16,7 @@ export class AppDataSourceManager {
   private formInstanceEM: EntityApiManager;
   private formEM: EntityApiManager;
   private patientEM: EntityApiManager;
+  private patientVisitEM: EntityApiManager;
 
   private constructor(private directory: string) {
     const database = this.directory + "/model_repo.sqlite";
@@ -24,14 +26,26 @@ export class AppDataSourceManager {
       database: database,
       synchronize: true,
       logging: true,
-  entities: [FormInstanceEntity, FormEntity, PatientEntity],
+      entities: [
+        FormInstanceEntity,
+        FormEntity,
+        PatientEntity,
+        PatientVisitEntity,
+      ],
       migrations: [],
       subscribers: [],
     });
 
     this.formEM = new EntityApiManager(this.dataSource, "FormEntity");
-  this.formInstanceEM = new EntityApiManager(this.dataSource, "FormInstanceEntity");
-  this.patientEM = new EntityApiManager(this.dataSource, "PatientEntity");
+    this.formInstanceEM = new EntityApiManager(
+      this.dataSource,
+      "FormInstanceEntity"
+    );
+    this.patientEM = new EntityApiManager(this.dataSource, "PatientEntity");
+    this.patientVisitEM = new EntityApiManager(
+      this.dataSource,
+      "PatientVisitEntity"
+    );
   }
 
   public static async getInstance(): Promise<AppDataSourceManager> {
@@ -70,8 +84,12 @@ export class AppDataSourceManager {
         app,
         RepoApiEndpointRegistry.FORM_INSTANCE
       );
-  this.formEM.registerRoutes(app, RepoApiEndpointRegistry.FORM);
-  this.patientEM.registerRoutes(app, RepoApiEndpointRegistry.PATIENT);
+      this.formEM.registerRoutes(app, RepoApiEndpointRegistry.FORM);
+      this.patientEM.registerRoutes(app, RepoApiEndpointRegistry.PATIENT);
+      this.patientVisitEM.registerRoutes(
+        app,
+        RepoApiEndpointRegistry.PATIENT_VISIT
+      );
     }
   }
 }

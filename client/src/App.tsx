@@ -10,6 +10,7 @@ import {
   FillForm,
 } from "./forms/ui";
 import { PatientsList, PatientEditor } from "./patients/ui";
+import { PatientVisitCreator } from "./patients/ui/PatientVisitCreator";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "./sketchy-bs.css";
@@ -31,6 +32,10 @@ function App() {
             <Route path="/patients" element={<PatientsList />} />
             <Route path="/patients/create" element={<PatientEditor />} />
             <Route path="/patients/edit/:id" element={<PatientEditor />} />
+            <Route
+              path="/patients/:patientId/visits/create"
+              element={<PatientVisitCreator />}
+            />
           </Routes>
         </HashRouter>
       </Container>

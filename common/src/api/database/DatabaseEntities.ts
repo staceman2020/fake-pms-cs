@@ -29,3 +29,13 @@ export interface IPatientEntity extends IRepoBaseEntity {
   emergencyContactName?: string;
   emergencyContactPhone?: string;
 }
+
+export interface IPatientVisitEntity extends IRepoBaseEntity {
+  patientId: string; // Reference to patient
+  dateOfVisit: Date;
+  doctorName: string;
+  problem: string; // Chief complaint / reason for visit
+  diagnosis?: string; // Diagnosis details
+  prescriptions?: string; // Text or serialized JSON of prescriptions
+  notes?: string; // Additional notes
+}

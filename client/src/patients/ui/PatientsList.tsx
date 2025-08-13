@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Container, Row, Col, Card, Button, Table, Alert, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Table,
+  Alert,
+  Spinner,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { PatientsApi } from "../api/PatientsApi";
 import type { IPatientEntity } from "../../../../common/src/api/database/DatabaseEntities";
@@ -36,7 +45,9 @@ export const PatientsList: React.FC = () => {
         await patientsApi.dataApi.delete(id);
         await loadPatients();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to delete patient");
+        setError(
+          err instanceof Error ? err.message : "Failed to delete patient"
+        );
       }
     }
   };
@@ -58,11 +69,15 @@ export const PatientsList: React.FC = () => {
         <Col>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1>Patients</h1>
-            <Button variant="primary" onClick={handleCreateNew}>Add Patient</Button>
+            <Button variant="primary" onClick={handleCreateNew}>
+              Add Patient
+            </Button>
           </div>
 
           {error && (
-            <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>
+            <Alert variant="danger" dismissible onClose={() => setError(null)}>
+              {error}
+            </Alert>
           )}
 
           {patients.length === 0 && !loading ? (
@@ -70,7 +85,9 @@ export const PatientsList: React.FC = () => {
               <Card.Body className="text-center">
                 <h5>No patients found</h5>
                 <p>Get started by adding your first patient.</p>
-                <Button variant="primary" onClick={handleCreateNew}>Add First Patient</Button>
+                <Button variant="primary" onClick={handleCreateNew}>
+                  Add First Patient
+                </Button>
               </Card.Body>
             </Card>
           ) : (
@@ -92,17 +109,50 @@ export const PatientsList: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {patients.map(p => (
+                    {patients.map((p) => (
                       <tr key={p.id}>
-                        <td><strong>{p.firstName} {p.lastName}</strong></td>
-                        <td>{p.medicalRecordNumber}</td>
-                        <td>{p.dateOfBirth ? new Date(p.dateOfBirth).toLocaleDateString() : ''}</td>
-                        <td>{p.gender}</td>
-                        <td>{p.email || ''}</td>
-                        <td>{p.phone || ''}</td>
                         <td>
-                          <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleEdit(p.id)}>Edit</Button>
-                          <Button variant="outline-danger" size="sm" onClick={() => handleDelete(p.id, `${p.firstName} ${p.lastName}`)}>Delete</Button>
+                          <strong>
+                            {p.firstName} {p.lastName}
+                          </strong>
+                        </td>
+                        <td>{p.medicalRecordNumber}</td>
+                        <td>
+                          {p.dateOfBirth
+                            ? new Date(p.dateOfBirth).toLocaleDateString()
+                            : ""}
+                        </td>
+                        <td>{p.gender}</td>
+                        <td>{p.email || ""}</td>
+                        <td>{p.phone || ""}</td>
+                        <td>
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => handleEdit(p.id)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline-success"
+                            size="sm"
+                            className="me-2"
+                            onClick={() =>
+                              navigate(`/patients/${p.id}/visits/create`)
+                            }
+                          >
+                            New Visit
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() =>
+                              handleDelete(p.id, `${p.firstName} ${p.lastName}`)
+                            }
+                          >
+                            Delete
+                          </Button>
                         </td>
                       </tr>
                     ))}
