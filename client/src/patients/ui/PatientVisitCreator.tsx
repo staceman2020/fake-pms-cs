@@ -181,6 +181,15 @@ export const PatientVisitCreator: React.FC = () => {
           </Card>
         </Col>
       </Row>
+
+      <Row>
+        <Col xs={12} className="mt-4">
+          <iframe
+            src="http://localhost:5173/#/forms/display/1a68ed70-6d1c-4257-bb2b-ba5745109418"
+            style={{ border: "none", width: "100%", height: "500px" }}
+          />
+        </Col>
+      </Row>
     </Container>
   );
 };

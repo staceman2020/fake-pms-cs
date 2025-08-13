@@ -11,7 +11,11 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { PatientsApi } from "../api/PatientsApi";
-import type { IPatientEntity } from "../../../../common/src/api/database/DatabaseEntities";
+import { PatientVisitsApi } from "../api/PatientVisitsApi";
+import type {
+  IPatientEntity,
+  IPatientVisitEntity,
+} from "../../../../common/src/api/database/DatabaseEntities";
 
 interface FormState {
   firstName: string;
@@ -43,6 +47,7 @@ export const PatientEditor: React.FC = () => {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const patientsApi = useMemo(() => new PatientsApi(), []);
+  const visitsApi = useMemo(() => new PatientVisitsApi(), []);
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(defaultState);
@@ -50,6 +55,9 @@ export const PatientEditor: React.FC = () => {
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [visits, setVisits] = useState<IPatientVisitEntity[]>([]);
+  const [visitsLoading, setVisitsLoading] = useState(false);
+  const [visitsError, setVisitsError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -81,6 +89,26 @@ export const PatientEditor: React.FC = () => {
     };
     fetchPatient();
   }, [id, patientsApi]);
+
+  // Load visits when editing existing patient
+  useEffect(() => {
+    const loadVisits = async () => {
+      if (!id) return;
+      setVisitsLoading(true);
+      setVisitsError(null);
+      try {
+        const data = await visitsApi.dataApi.findByField("patientId", id);
+        setVisits(data as IPatientVisitEntity[]);
+      } catch (err) {
+        setVisitsError(
+          err instanceof Error ? err.message : "Failed to load visits"
+        );
+      } finally {
+        setVisitsLoading(false);
+      }
+    };
+    loadVisits();
+  }, [id, visitsApi]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -291,6 +319,94 @@ export const PatientEditor: React.FC = () => {
               </Form>
             </Card.Body>
           </Card>
+          {isEdit && (
+            <Card className="mt-4">
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0">Visits ({visits.length})</h5>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => navigate(`/patients/${id}/visits/create`)}
+                >
+                  New Visit
+                </Button>
+              </Card.Header>
+              <Card.Body className="p-0">
+                {visitsLoading && (
+                  <div className="text-center p-3">
+                    <Spinner animation="border" size="sm" /> Loading visits...
+                  </div>
+                )}
+                {visitsError && (
+                  <Alert
+                    variant="danger"
+                    className="m-3"
+                    dismissible
+                    onClose={() => setVisitsError(null)}
+                  >
+                    {visitsError}
+                  </Alert>
+                )}
+                {!visitsLoading && visits.length === 0 && !visitsError && (
+                  <div className="p-3 text-center text-muted">
+                    No visits recorded yet.
+                  </div>
+                )}
+                {!visitsLoading && visits.length > 0 && (
+                  <div className="table-responsive">
+                    <table className="table table-striped table-hover mb-0">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Doctor</th>
+                          <th>Problem</th>
+                          <th>Diagnosis</th>
+                          <th>Prescriptions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visits
+                          .slice()
+                          .sort(
+                            (a, b) =>
+                              new Date(b.dateOfVisit).getTime() -
+                              new Date(a.dateOfVisit).getTime()
+                          )
+                          .map((v) => (
+                            <tr key={v.id}>
+                              <td>
+                                {v.dateOfVisit
+                                  ? new Date(v.dateOfVisit).toLocaleString()
+                                  : ""}
+                              </td>
+                              <td>{v.doctorName}</td>
+                              <td
+                                className="text-truncate"
+                                style={{ maxWidth: 180 }}
+                              >
+                                {v.problem}
+                              </td>
+                              <td
+                                className="text-truncate"
+                                style={{ maxWidth: 180 }}
+                              >
+                                {v.diagnosis || ""}
+                              </td>
+                              <td
+                                className="text-truncate"
+                                style={{ maxWidth: 180 }}
+                              >
+                                {v.prescriptions || ""}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+          )}
         </Col>
       </Row>
     </Container>
