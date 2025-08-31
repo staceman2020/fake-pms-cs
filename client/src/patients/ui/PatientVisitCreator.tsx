@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Container,
@@ -23,6 +23,11 @@ interface FormState {
   notes: string;
 }
 
+interface FormOption {
+  label: string;
+  value: string;
+}
+
 const defaultState: FormState = {
   dateOfVisit: new Date().toISOString().substring(0, 16), // for datetime-local
   doctorName: "",
@@ -40,6 +45,39 @@ export const PatientVisitCreator: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Form selection state
+  const [forms, setForms] = useState<FormOption[]>([]);
+  const [selectedFormId, setSelectedFormId] = useState<string>("");
+  const [formsLoading, setFormsLoading] = useState(false);
+  const [formsError, setFormsError] = useState<string | null>(null);
+
+  // Load available forms on component mount
+  useEffect(() => {
+    const loadForms = async () => {
+      setFormsLoading(true);
+      setFormsError(null);
+      try {
+        const response = await fetch("http://localhost:3041/ext/api/forms");
+        if (!response.ok) {
+          throw new Error(`Failed to load forms: ${response.statusText}`);
+        }
+        const formsData = await response.json();
+        setForms(formsData);
+        // Set default selection to first form if available
+        if (formsData.length > 0) {
+          // setSelectedFormId(formsData[0].value);
+        }
+      } catch (err) {
+        setFormsError(
+          err instanceof Error ? err.message : "Failed to load forms"
+        );
+      } finally {
+        setFormsLoading(false);
+      }
+    };
+    loadForms();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -81,7 +119,7 @@ export const PatientVisitCreator: React.FC = () => {
   return (
     <Container className="mt-4">
       <Row>
-        <Col md={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
+        <Col md={{ span: 12, offset: 1 }} lg={{ span: 12, offset: 2 }}>
           <Card>
             <Card.Header>
               <h3 className="mb-0">New Patient Visit</h3>
@@ -105,7 +143,7 @@ export const PatientVisitCreator: React.FC = () => {
                   {success}
                 </Alert>
               )}
-              
+
               <Tabs defaultActiveKey="visit" className="mb-3">
                 <Tab eventKey="visit" title="Visit">
                   <Form onSubmit={handleSubmit}>
@@ -183,12 +221,48 @@ export const PatientVisitCreator: React.FC = () => {
                     </div>
                   </Form>
                 </Tab>
-                
+
                 <Tab eventKey="insurance" title="Insurance">
-                  <iframe
-                    src="http://localhost:3040/#/forms/display/1a68ed70-6d1c-4257-bb2b-ba5745109418"
-                    style={{ border: "none", width: "100%", height: "500px" }}
-                  />
+                  {formsError && (
+                    <Alert variant="danger" className="mb-3">
+                      {formsError}
+                    </Alert>
+                  )}
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Select Insurance Form</Form.Label>
+                    <Form.Select
+                      value={selectedFormId}
+                      onChange={(e) => setSelectedFormId(e.target.value)}
+                      disabled={formsLoading}
+                    >
+                      {formsLoading ? (
+                        <option>Loading forms...</option>
+                      ) : (
+                        <>
+                          <option value="">Select a form</option>
+                          {forms.map((form) => (
+                            <option key={form.value} value={form.value}>
+                              {form.label}
+                            </option>
+                          ))}
+                        </>
+                      )}
+                    </Form.Select>
+                  </Form.Group>
+
+                  {selectedFormId && (
+                    <iframe
+                      src={`http://localhost:3040/#/forms/display/${selectedFormId}`}
+                      style={{ border: "none", width: "100%", height: "500px" }}
+                    />
+                  )}
+
+                  {!selectedFormId && !formsLoading && (
+                    <div className="text-center text-muted p-4">
+                      Please select a form to display
+                    </div>
+                  )}
                 </Tab>
               </Tabs>
             </Card.Body>
