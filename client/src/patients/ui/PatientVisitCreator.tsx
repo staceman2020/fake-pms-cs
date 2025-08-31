@@ -8,6 +8,8 @@ import {
   Form,
   Button,
   Alert,
+  Tab,
+  Tabs,
 } from "react-bootstrap";
 import { PatientVisitsApi } from "../api/PatientVisitsApi";
 import type { IPatientVisitEntity } from "../../../../common/src/api/database/DatabaseEntities";
@@ -103,91 +105,94 @@ export const PatientVisitCreator: React.FC = () => {
                   {success}
                 </Alert>
               )}
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Date / Time of Visit</Form.Label>
-                  <Form.Control
-                    type="datetime-local"
-                    name="dateOfVisit"
-                    value={form.dateOfVisit}
-                    onChange={handleChange}
-                    required
+              
+              <Tabs defaultActiveKey="visit" className="mb-3">
+                <Tab eventKey="visit" title="Visit">
+                  <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Date / Time of Visit</Form.Label>
+                      <Form.Control
+                        type="datetime-local"
+                        name="dateOfVisit"
+                        value={form.dateOfVisit}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Doctor Name</Form.Label>
+                      <Form.Control
+                        name="doctorName"
+                        value={form.doctorName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Problem / Chief Complaint</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="problem"
+                        value={form.problem}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Diagnosis</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="diagnosis"
+                        value={form.diagnosis}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Prescriptions</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="prescriptions"
+                        value={form.prescriptions}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Notes</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="notes"
+                        value={form.notes}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                    <div className="d-flex justify-content-between">
+                      <Button
+                        variant="secondary"
+                        onClick={() => navigate(-1)}
+                        disabled={saving}
+                      >
+                        Back
+                      </Button>
+                      <Button type="submit" variant="primary" disabled={saving}>
+                        {saving ? "Saving..." : "Save Visit"}
+                      </Button>
+                    </div>
+                  </Form>
+                </Tab>
+                
+                <Tab eventKey="insurance" title="Insurance">
+                  <iframe
+                    src="http://localhost:3040/#/forms/display/1a68ed70-6d1c-4257-bb2b-ba5745109418"
+                    style={{ border: "none", width: "100%", height: "500px" }}
                   />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Doctor Name</Form.Label>
-                  <Form.Control
-                    name="doctorName"
-                    value={form.doctorName}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Problem / Chief Complaint</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    name="problem"
-                    value={form.problem}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Diagnosis</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    name="diagnosis"
-                    value={form.diagnosis}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Prescriptions</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    name="prescriptions"
-                    value={form.prescriptions}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Notes</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    name="notes"
-                    value={form.notes}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-                <div className="d-flex justify-content-between">
-                  <Button
-                    variant="secondary"
-                    onClick={() => navigate(-1)}
-                    disabled={saving}
-                  >
-                    Back
-                  </Button>
-                  <Button type="submit" variant="primary" disabled={saving}>
-                    {saving ? "Saving..." : "Save Visit"}
-                  </Button>
-                </div>
-              </Form>
+                </Tab>
+              </Tabs>
             </Card.Body>
           </Card>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={12} className="mt-4">
-          <iframe
-            src="http://localhost:3040/#/forms/display/1a68ed70-6d1c-4257-bb2b-ba5745109418"
-            style={{ border: "none", width: "100%", height: "500px" }}
-          />
         </Col>
       </Row>
     </Container>
