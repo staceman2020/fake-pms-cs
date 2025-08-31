@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Container,
@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import { PatientVisitsApi } from "../api/PatientVisitsApi";
 import type { IPatientVisitEntity } from "../../../../common/src/api/database/DatabaseEntities";
+import { InsuranceFormsChannel } from "./InsuranceFormsChannel";
 
 interface FormState {
   dateOfVisit: string;
@@ -115,6 +116,15 @@ export const PatientVisitCreator: React.FC = () => {
       setSaving(false);
     }
   };
+
+  const channel = useMemo(() => {
+    return new InsuranceFormsChannel({
+      onLoadRequest: (request: OnFormLoadRequest) => {
+        // Handle form loading logic here
+        console.log("Requested", request);
+      },
+    });
+  }, [selectedFormId]);
 
   return (
     <Container className="mt-4">
@@ -254,7 +264,12 @@ export const PatientVisitCreator: React.FC = () => {
                   {selectedFormId && (
                     <iframe
                       src={`http://localhost:3040/#/forms/display/${selectedFormId}`}
-                      style={{ border: "none", width: "100%", height: "500px" }}
+                      style={{
+                        border: "none",
+                        width: "100%",
+                        height: "500px",
+                        minHeight: "70vh",
+                      }}
                     />
                   )}
 

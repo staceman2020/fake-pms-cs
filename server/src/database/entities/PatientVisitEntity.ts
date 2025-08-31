@@ -1,4 +1,4 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JsonContains } from "typeorm";
 import { IPatientVisitEntity } from "../../../../common/src/api/database/DatabaseEntities";
 import { BaseEntity } from "./BaseEntity";
 
@@ -27,4 +27,7 @@ export class PatientVisitEntity
 
   @Column({ type: "text", nullable: true })
   notes?: string;
+
+  @Column({ type: "json" })
+  insuranceForms?: object;
 }

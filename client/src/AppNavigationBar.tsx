@@ -1,14 +1,6 @@
-import {
-  Container,
-  Nav,
-  Navbar,
-  NavDropdown,
-  Button,
-  Modal,
-  Form,
-} from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
 import { useState } from "react";
+import { Button, Container, Form, Modal, Nav, Navbar } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import { useUser } from "./UserHook";
 
 //import { dialog } from 'electron'
@@ -36,23 +28,9 @@ export function AppNavigationBar() {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <LinkContainer to="/forms">
-                <Nav.Link href="#forms">Forms</Nav.Link>
-              </LinkContainer>
               <LinkContainer to="/patients">
                 <Nav.Link href="#patients">Patients</Nav.Link>
               </LinkContainer>
-              <LinkContainer to="/fillform">
-                <Nav.Link href="#fillform">Fill Form</Nav.Link>
-              </LinkContainer>
-              <LinkContainer to="/myforms">
-                <Nav.Link href="#myforms">My Forms</Nav.Link>
-              </LinkContainer>
-              <NavDropdown title="Admin" id="basic-nav-dropdown">
-                <LinkContainer to="/myforms">
-                  <Nav.Link href="#myforms">My Forms</Nav.Link>
-                </LinkContainer>
-              </NavDropdown>
             </Nav>
             <div className="d-flex align-items-center">
               {username && (

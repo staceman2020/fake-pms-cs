@@ -38,4 +38,5 @@ export interface IPatientVisitEntity extends IRepoBaseEntity {
   diagnosis?: string; // Diagnosis details
   prescriptions?: string; // Text or serialized JSON of prescriptions
   notes?: string; // Additional notes
+  insuranceForms?: object;
 }
