@@ -49,25 +49,8 @@ export function AppNavigationBar() {
                 <Nav.Link href="#myforms">My Forms</Nav.Link>
               </LinkContainer>
               <NavDropdown title="Admin" id="basic-nav-dropdown">
-                <LinkContainer to="/admin/importexport">
-                  <NavDropdown.Item href="#action/3.1">
-                    Import/Export Database
-                  </NavDropdown.Item>
-                </LinkContainer>
-                <LinkContainer to="/admin/connectivity">
-                  <NavDropdown.Item href="#action/3.1">
-                    Connectivity Tests
-                  </NavDropdown.Item>
-                </LinkContainer>
-                <LinkContainer to="/admin/pictureimport">
-                  <NavDropdown.Item href="#action/3.1">
-                    Picture Import
-                  </NavDropdown.Item>
-                </LinkContainer>
-                <LinkContainer to="/sync">
-                  <NavDropdown.Item href="#action/3.1">
-                    Server Sync
-                  </NavDropdown.Item>
+                <LinkContainer to="/myforms">
+                  <Nav.Link href="#myforms">My Forms</Nav.Link>
                 </LinkContainer>
               </NavDropdown>
             </Nav>

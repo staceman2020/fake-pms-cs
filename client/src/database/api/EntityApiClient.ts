@@ -9,15 +9,15 @@ export class EntityApiClient<T> extends APIBase {
     this.endpoints = endpoints;
   }
 
-  async list(): Promise<T[]> {
+  async list(): Promise<T[] | undefined> {
     return this.fetchJSON(this.endpoints.list);
   }
 
-  async getItem(id: string): Promise<T> {
+  async getItem(id: string): Promise<T | undefined> {
     return this.fetchJSON(this.endpoints.item.replace(":id", id));
   }
 
-  async create(data: object): Promise<T> {
+  async create(data: object): Promise<T | undefined> {
     return this.postJSON(this.endpoints.create, {
       method: "POST",
       headers: {
@@ -50,7 +50,7 @@ export class EntityApiClient<T> extends APIBase {
   async count() {
     return this.fetchJSON(this.endpoints.count);
   }
-  async exists(id: string): Promise<boolean> {
+  async exists(id: string): Promise<boolean | undefined> {
     return this.fetchJSON(this.endpoints.exists.replace(":id", id));
   }
   async findByField(field: string, value: string | number | boolean) {
