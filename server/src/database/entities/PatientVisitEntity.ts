@@ -28,6 +28,6 @@ export class PatientVisitEntity
   @Column({ type: "text", nullable: true })
   notes?: string;
 
-  @Column({ type: "json" })
+  @Column({ type: "json", nullable: true })
   insuranceForms?: object;
 }

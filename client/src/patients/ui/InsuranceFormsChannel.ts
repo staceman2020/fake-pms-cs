@@ -74,8 +74,11 @@ export class InsuranceFormsChannel {
   //private listeners: { [key: string]: ((data: any) => void)[] } = {};
   private listeners: FormsChannelListener;
 
+  private replySource: MessageEventSource | null = null;
+
   constructor(listeners: FormsChannelListener) {
     this.listeners = listeners;
+
     // Listen for messages from parent window
     window.addEventListener("message", this.handleMessage.bind(this));
   }
@@ -84,6 +87,8 @@ export class InsuranceFormsChannel {
     if (event.data?.channel !== this.channelName) {
       return;
     }
+
+    this.replySource = event.source;
 
     const { type, data } = event.data;
     switch (type) {
@@ -130,13 +135,55 @@ export class InsuranceFormsChannel {
 
     // Send to parent window
     if (window.parent && window.parent !== window) {
+      console.log("Sending message to parent window:", message);
       window.parent.postMessage(message, "*");
+      return;
     }
 
     // Also send to opener (if opened in new window)
     if (window.opener) {
+      console.log("Sending message to opener:", message);
       window.opener.postMessage(message, "*");
+      return;
     }
+
+    console.log("Posting...:", message);
+    window.postMessage(message, "*");
+
+    // If no parent or opener, log to console
+    console.log("No parent or opener found for message:", message);
+  }
+
+  public reply(
+    type: string,
+    data?: OnLoadResponse | OnSaveResponse | OnSubmitResponse
+  ) {
+    const message = {
+      channel: this.channelName,
+      type,
+      data,
+      timestamp: Date.now(),
+    };
+    this.replySource?.postMessage(message, { targetOrigin: "*" });
+    // // Send to parent window
+    // if (window.parent && window.parent !== window) {
+    //   console.log("Sending message to parent window:", message);
+    //   window.parent.postMessage(message, "*");
+    //   return;
+    // }
+
+    // // Also send to opener (if opened in new window)
+    // if (window.opener) {
+    //   console.log("Sending message to opener:", message);
+    //   window.opener.postMessage(message, "*");
+    //   return;
+    // }
+
+    // console.log("Posting...:", message);
+    // window.postMessage(message, "*");
+
+    // // If no parent or opener, log to console
+    // console.log("No parent or opener found for message:", message);
   }
 
   /**
@@ -147,7 +194,7 @@ export class InsuranceFormsChannel {
   }
 
   public sendLoadResponse(response: OnLoadResponse) {
-    this.send(FormsChannelEvent.OnLoadResponse, response);
+    this.reply(FormsChannelEvent.OnLoadResponse, response);
   }
 
   /**
@@ -158,7 +205,7 @@ export class InsuranceFormsChannel {
   }
 
   public sendSaveResponse(response: OnSaveResponse) {
-    this.send(FormsChannelEvent.OnSaveResponse, response);
+    this.reply(FormsChannelEvent.OnSaveResponse, response);
   }
 
   /**
@@ -169,7 +216,7 @@ export class InsuranceFormsChannel {
   }
 
   public sendSubmitResponse(response: OnSubmitResponse) {
-    this.send(FormsChannelEvent.OnSubmitResponse, response);
+    this.reply(FormsChannelEvent.OnSubmitResponse, response);
   }
 
   /**

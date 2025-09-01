@@ -1,19 +1,34 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Form,
-  Button,
   Alert,
+  Button,
+  Card,
+  Col,
+  Container,
+  Form,
+  Modal,
+  Row,
   Tab,
+  Table,
   Tabs,
 } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import type {
+  IPatientEntity,
+  IPatientVisitEntity,
+} from "../../../../common/src/api/database/DatabaseEntities";
 import { PatientVisitsApi } from "../api/PatientVisitsApi";
-import type { IPatientVisitEntity } from "../../../../common/src/api/database/DatabaseEntities";
-import { InsuranceFormsChannel } from "./InsuranceFormsChannel";
+import { PatientsApi } from "../api/PatientsApi";
+import {
+  InsuranceFormsChannel,
+  type OnLoadRequest,
+} from "./InsuranceFormsChannel";
 
 interface FormState {
   dateOfVisit: string;
@@ -29,6 +44,13 @@ interface FormOption {
   value: string;
 }
 
+interface ShareableField {
+  key: string;
+  label: string;
+  value: string | undefined;
+  checked: boolean;
+}
+
 const defaultState: FormState = {
   dateOfVisit: new Date().toISOString().substring(0, 16), // for datetime-local
   doctorName: "",
@@ -42,6 +64,7 @@ export const PatientVisitCreator: React.FC = () => {
   const { patientId } = useParams();
   const navigate = useNavigate();
   const visitsApi = new PatientVisitsApi();
+  const patientsApi = useMemo(() => new PatientsApi(), []);
   const [form, setForm] = useState<FormState>(defaultState);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +75,15 @@ export const PatientVisitCreator: React.FC = () => {
   const [selectedFormId, setSelectedFormId] = useState<string>("");
   const [formsLoading, setFormsLoading] = useState(false);
   const [formsError, setFormsError] = useState<string | null>(null);
+
+  // Patient data and modal state
+  const [patient, setPatient] = useState<IPatientEntity | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareableFields, setShareableFields] = useState<ShareableField[]>([]);
+  const [currentFormRequest, setCurrentFormRequest] =
+    useState<OnLoadRequest | null>(null);
+
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Load available forms on component mount
   useEffect(() => {
@@ -79,6 +111,116 @@ export const PatientVisitCreator: React.FC = () => {
     };
     loadForms();
   }, []);
+
+  // Load patient data on component mount
+  useEffect(() => {
+    const loadPatient = async () => {
+      if (!patientId) return;
+      try {
+        const patientData = await patientsApi.dataApi.getItem(patientId);
+        setPatient(patientData || null);
+      } catch (err) {
+        console.error("Failed to load patient:", err);
+      }
+    };
+    loadPatient();
+  }, [patientId, patientsApi]);
+
+  // Helper function to create shareable fields from patient data
+  const createShareableFields = useCallback(
+    (patient: IPatientEntity, requestFields: string[]): ShareableField[] => {
+      const fieldMapping: Record<
+        string,
+        { label: string; value: string | undefined }
+      > = {
+        "client.familyName": {
+          label: "Last Name",
+          value: patient.lastName,
+        },
+        "client.firstNames": {
+          label: "First Names",
+          value: patient.firstName,
+        },
+        "client.gender": {
+          label: "Gender",
+          value: patient.gender,
+        },
+        "client.dateOfBirth": {
+          label: "Date of Birth",
+          value: patient.dateOfBirth
+            ? new Date(patient.dateOfBirth).toLocaleDateString()
+            : undefined,
+        },
+        "client.phone": {
+          label: "Phone",
+          value: patient.phone,
+        },
+        "client.address": {
+          label: "Address",
+          value: patient.address,
+        },
+      };
+
+      return requestFields
+        .filter((field) => fieldMapping[field])
+        .map((field) => ({
+          key: field,
+          label: fieldMapping[field].label,
+          value: fieldMapping[field].value,
+          checked: true,
+        }));
+    },
+    []
+  );
+
+  // Handle select all/unselect all
+  const handleSelectAll = (checked: boolean) => {
+    setShareableFields((fields) =>
+      fields.map((field) => ({ ...field, checked }))
+    );
+  };
+
+  // Handle individual field checkbox change
+  const handleFieldCheck = (key: string, checked: boolean) => {
+    setShareableFields((fields) =>
+      fields.map((field) => (field.key === key ? { ...field, checked } : field))
+    );
+  };
+
+  // Handle modal submit
+  const handleShareSubmit = () => {
+    console.log("Sharing data...");
+    if (!currentFormRequest) {
+      console.log("Abandoning...");
+      return;
+    }
+
+    const responseData: Record<string, string | number | boolean> = {};
+    shareableFields.forEach((field) => {
+      if (field.checked && field.value) {
+        responseData[field.key] = field.value;
+      }
+    });
+
+    // TODO: Send response back to form via channel
+    console.log("Sharing data:", responseData);
+    if (channel) {
+      channel.sendLoadResponse({
+        formId: currentFormRequest.formId,
+        prepopulated: responseData,
+        content: {}, // No existing content to restore
+      });
+    }
+
+    setShowShareModal(false);
+    setCurrentFormRequest(null);
+  };
+
+  // Handle modal cancel
+  const handleShareCancel = () => {
+    setShowShareModal(false);
+    setCurrentFormRequest(null);
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -119,13 +261,48 @@ export const PatientVisitCreator: React.FC = () => {
 
   const channel = useMemo(() => {
     return new InsuranceFormsChannel({
-      onLoadRequest: (request: OnFormLoadRequest) => {
-        // Handle form loading logic here
-        console.log("Requested", request);
+      onLoadRequest: (request: OnLoadRequest) => {
+        console.log("Form requesting data:", request);
+
+        if (!patient) {
+          console.warn("Patient data not available");
+          return;
+        }
+        if (!iframeRef.current) {
+          console.warn("Iframe reference not available");
+          return;
+        }
+
+        // Create shareable fields based on request
+        const fields = createShareableFields(patient, request.fields);
+
+        console.log("Shareable fields:", fields);
+
+        if (fields.length > 0) {
+          setShareableFields(fields);
+          setCurrentFormRequest(request);
+          setShowShareModal(true);
+        }
       },
     });
-  }, [selectedFormId]);
+  }, [patient, createShareableFields, iframeRef]);
 
+  // const channel = useMemo(() => {
+
+  // }, [patient, createShareableFields, iframeRef]);
+
+  useEffect(() => {
+    console.log("IFrame Appeared", iframeRef.current != undefined);
+  }, [iframeRef]);
+
+  // Initialize the channel when component mounts
+  useEffect(() => {
+    // Channel is automatically initialized via useMemo
+    console.log("Insurance forms channel initialized");
+    return () => {
+      // Cleanup if needed
+    };
+  }, [channel]);
   return (
     <Container className="mt-4">
       <Row>
@@ -270,6 +447,11 @@ export const PatientVisitCreator: React.FC = () => {
                         height: "500px",
                         minHeight: "70vh",
                       }}
+                      ref={iframeRef}
+                      onLoad={() => {
+                        console.log("IFrame Loaded", iframeRef.current);
+                        // iFrameLoadHandler();
+                      }}
                     />
                   )}
 
@@ -284,6 +466,85 @@ export const PatientVisitCreator: React.FC = () => {
           </Card>
         </Col>
       </Row>
+
+      {/* Share Information Modal */}
+      <Modal show={showShareModal} onHide={handleShareCancel} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Share Information With Form</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Alert variant="info">
+            The form is requesting information to share
+          </Alert>
+
+          {shareableFields.length > 0 && (
+            <>
+              <div className="mb-3">
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleSelectAll(true)}
+                >
+                  Select All
+                </Button>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => handleSelectAll(false)}
+                >
+                  Unselect All
+                </Button>
+              </div>
+
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>Share</th>
+                    <th>Field</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shareableFields.map((field) => (
+                    <tr key={field.key}>
+                      <td>
+                        <Form.Check
+                          type="checkbox"
+                          checked={field.checked}
+                          onChange={(e) =>
+                            handleFieldCheck(field.key, e.target.checked)
+                          }
+                        />
+                      </td>
+                      <td>{field.label}</td>
+                      <td>{field.value || "N/A"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </>
+          )}
+
+          {shareableFields.length === 0 && (
+            <p className="text-muted">
+              No matching patient information found for the requested fields.
+            </p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleShareCancel}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleShareSubmit}
+            disabled={shareableFields.length === 0}
+          >
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
